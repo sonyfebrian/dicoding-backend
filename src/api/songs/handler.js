@@ -18,12 +18,15 @@ class SongsHandler {
         title, year, performer, genre, duration,
       } = request.payload;
 
+      const { id: credentialId } = request.auth.credentials;
+
       const songId = await this._service.addSong({
         title,
         year,
         performer,
         genre,
         duration,
+        owner: credentialId,
       });
 
       const response = h.response({
@@ -54,8 +57,9 @@ class SongsHandler {
     }
   }
 
-  async getSongsHandler() {
-    const songs = await this._service.getSongs();
+  async getSongsHandler(request) {
+    const { id: credentialId } = request.auth.credentials;
+    const songs = await this._service.getSongs(credentialId);
     return {
       status: 'success',
       data: {
@@ -67,6 +71,8 @@ class SongsHandler {
   async getSongByIdHandler(request, h) {
     try {
       const { id } = request.params;
+      const { id: credentialId } = request.auth.credentials;
+      await this._service.verifyNoteOwner(id, credentialId);
       const song = await this._service.getSongById(id);
       return {
         status: 'success',
@@ -97,6 +103,8 @@ class SongsHandler {
     try {
       this._validator.validateSongPayload(request.payload);
       const { id } = request.params;
+      const { id: credentialId } = request.auth.credentials;
+      await this._service.verifySongOwner(id, credentialId);
       console.log(id);
 
       await this._service.editSongById(id, request.payload);
@@ -126,6 +134,8 @@ class SongsHandler {
   async deleteSongByIdHandler(request, h) {
     try {
       const { id } = request.params;
+      const { id: credentialId } = request.auth.credentials;
+      await this._service.verifyNoteOwner(id, credentialId);
       await this._service.deleteSongById(id);
       return {
         status: 'success',
