@@ -4,6 +4,7 @@ class SongsHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
+
     this.postSongHandler = this.postSongHandler.bind(this);
     this.getSongsHandler = this.getSongsHandler.bind(this);
     this.getSongByIdHandler = this.getSongByIdHandler.bind(this);
@@ -15,23 +16,16 @@ class SongsHandler {
     try {
       this._validator.validateSongPayload(request.payload);
       const {
-        title, year, performer, genre, duration,
+        title = 'untitled', year, performer, genre, duration,
       } = request.payload;
 
-      const { id: credentialId } = request.auth.credentials;
-
       const songId = await this._service.addSong({
-        title,
-        year,
-        performer,
-        genre,
-        duration,
-        owner: credentialId,
+        title, year, performer, genre, duration,
       });
 
       const response = h.response({
         status: 'success',
-        message: 'lagu berhasil disimpan',
+        message: 'Lagu berhasil ditambahkan',
         data: {
           songId,
         },
@@ -47,9 +41,11 @@ class SongsHandler {
         response.code(error.statusCode);
         return response;
       }
+
+     
       const response = h.response({
         status: 'error',
-        message: 'Maaf, terjadi kesalahan pada server kami.',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
       });
       response.code(500);
       console.error(error);
@@ -57,23 +53,43 @@ class SongsHandler {
     }
   }
 
-  async getSongsHandler(request) {
-    const { id: credentialId } = request.auth.credentials;
-    const songs = await this._service.getSongs(credentialId);
-    return {
-      status: 'success',
-      data: {
-        songs,
-      },
-    };
+  async getSongsHandler(h) {
+    try {
+      const songs = await this._service.getSongs();
+      return {
+        status: 'success',
+        data: {
+          songs: songs.map((song) => ({
+            id: song.id,
+            title: song.title,
+            performer: song.performer,
+          })),
+        },
+      };
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(404);
+        return response;
+      }
+     
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      response.code(500);
+      console.error(error);
+      return response;
+    }
   }
 
   async getSongByIdHandler(request, h) {
     try {
-      const { id } = request.params;
-      const { id: credentialId } = request.auth.credentials;
-      await this._service.verifyNoteOwner(id, credentialId);
-      const song = await this._service.getSongById(id);
+      const { songId } = request.params;
+      const song = await this._service.getSongById(songId);
       return {
         status: 'success',
         data: {
@@ -86,12 +102,13 @@ class SongsHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(error.statusCode);
+        response.code(404);
         return response;
       }
+    
       const response = h.response({
         status: 'error',
-        message: 'Maaf, terjadi kesalahan pada server kami.',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
       });
       response.code(500);
       console.error(error);
@@ -102,12 +119,10 @@ class SongsHandler {
   async putSongByIdHandler(request, h) {
     try {
       this._validator.validateSongPayload(request.payload);
-      const { id } = request.params;
-      const { id: credentialId } = request.auth.credentials;
-      await this._service.verifySongOwner(id, credentialId);
-      console.log(id);
+      const { songId } = request.params;
 
-      await this._service.editSongById(id, request.payload);
+      await this._service.editSongById(songId, request.payload);
+
       return {
         status: 'success',
         message: 'lagu berhasil diperbarui',
@@ -121,9 +136,10 @@ class SongsHandler {
         response.code(error.statusCode);
         return response;
       }
+     
       const response = h.response({
         status: 'error',
-        message: 'Maaf, terjadi kesalahan pada server kami.',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
       });
       response.code(500);
       console.error(error);
@@ -133,10 +149,9 @@ class SongsHandler {
 
   async deleteSongByIdHandler(request, h) {
     try {
-      const { id } = request.params;
-      const { id: credentialId } = request.auth.credentials;
-      await this._service.verifyNoteOwner(id, credentialId);
-      await this._service.deleteSongById(id);
+      const { songId } = request.params;
+      await this._service.deleteSongById(songId);
+
       return {
         status: 'success',
         message: 'lagu berhasil dihapus',
@@ -150,9 +165,11 @@ class SongsHandler {
         response.code(error.statusCode);
         return response;
       }
+
+
       const response = h.response({
         status: 'error',
-        message: 'Maaf, terjadi kesalahan pada server kami.',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
       });
       response.code(500);
       console.error(error);
