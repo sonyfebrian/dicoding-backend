@@ -18,8 +18,14 @@ class PlaylistSongsHandler {
       const { songId } = request.payload;
       const { playlistId } = request.params;
 
-      await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId);
-      const playlistsongId = await this._playlistsongsService.addPlaylistSong({ songId, playlistId });
+      await this._playlistsService.verifyPlaylistAccess(
+        playlistId,
+        credentialId,
+      );
+      const playlistsongId = await this._playlistsongsService.addPlaylistSong({
+        songId,
+        playlistId,
+      });
 
       const response = h.response({
         status: 'success',
@@ -40,7 +46,6 @@ class PlaylistSongsHandler {
         return response;
       }
 
-  
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
@@ -56,8 +61,14 @@ class PlaylistSongsHandler {
       const { playlistId } = request.params;
       const { id: credentialId } = request.auth.credentials;
 
-      await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId);
-      const songs = await this._playlistsongsService.getPlaylistSongs(playlistId, credentialId);
+      await this._playlistsService.verifyPlaylistAccess(
+        playlistId,
+        credentialId,
+      );
+      const songs = await this._playlistsongsService.getPlaylistSongs(
+        playlistId,
+        credentialId,
+      );
       return {
         status: 'success',
         data: {
@@ -95,8 +106,14 @@ class PlaylistSongsHandler {
       const { songId } = request.payload;
       const { playlistId } = request.params;
 
-      await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId);
-      await this._playlistsongsService.deletePlaylistSongById(playlistId, songId);
+      await this._playlistsService.verifyPlaylistAccess(
+        playlistId,
+        credentialId,
+      );
+      await this._playlistsongsService.deletePlaylistSongById(
+        playlistId,
+        songId,
+      );
 
       return {
         status: 'success',
@@ -112,7 +129,6 @@ class PlaylistSongsHandler {
         return response;
       }
 
- 
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',

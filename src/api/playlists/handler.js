@@ -17,7 +17,8 @@ class PlaylistsHandler {
       const { id: credentialId } = request.auth.credentials;
 
       const playlistId = await this._service.addPlaylist({
-        name, owner: credentialId,
+        name,
+        owner: credentialId,
       });
 
       const response = h.response({
@@ -39,7 +40,6 @@ class PlaylistsHandler {
         return response;
       }
 
-    
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
@@ -86,7 +86,6 @@ class PlaylistsHandler {
         response.code(error.statusCode);
         return response;
       }
-
 
       const response = h.response({
         status: 'error',

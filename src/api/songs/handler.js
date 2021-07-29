@@ -16,11 +16,19 @@ class SongsHandler {
     try {
       this._validator.validateSongPayload(request.payload);
       const {
-        title = 'untitled', year, performer, genre, duration,
+        title = 'untitled',
+        year,
+        performer,
+        genre,
+        duration,
       } = request.payload;
 
       const songId = await this._service.addSong({
-        title, year, performer, genre, duration,
+        title,
+        year,
+        performer,
+        genre,
+        duration,
       });
 
       const response = h.response({
@@ -42,7 +50,6 @@ class SongsHandler {
         return response;
       }
 
-     
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
@@ -75,7 +82,7 @@ class SongsHandler {
         response.code(404);
         return response;
       }
-     
+
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
@@ -105,7 +112,7 @@ class SongsHandler {
         response.code(404);
         return response;
       }
-    
+
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
@@ -136,7 +143,7 @@ class SongsHandler {
         response.code(error.statusCode);
         return response;
       }
-     
+
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
@@ -165,7 +172,6 @@ class SongsHandler {
         response.code(error.statusCode);
         return response;
       }
-
 
       const response = h.response({
         status: 'error',
